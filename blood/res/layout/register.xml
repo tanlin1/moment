@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:background="@android:color/holo_purple"
+              android:focusable="false"
+		>
+	<TextView android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:text="@string/text_name"
+	          android:id="@+id/register_name"
+	          android:textSize="20sp"
+	          android:layout_marginTop="20dp"
+			/>
+	<EditText android:layout_width="fill_parent"
+	          android:layout_height="wrap_content"
+	          android:background="@drawable/register"
+	          android:hint="@string/Edit_Name"
+	          android:id="@+id/register_name_edit"
+	          android:singleLine="true"
+	          android:layout_marginLeft="10dp"
+	          android:layout_marginRight="30dp"
+
+			/>
+	<TextView android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:id="@+id/register_password"
+	          android:text="@string/text_set_password"
+
+	          android:textSize="20sp"
+			/>
+	<EditText android:layout_width="fill_parent"
+	          android:layout_height="wrap_content"
+	          android:hint="@string/Edit_Password"
+	          android:password="true"
+	          android:background="@drawable/register"
+	          android:id="@+id/register_password_edit"
+	          android:layout_marginLeft="10dp"
+	          android:layout_marginRight="30dp"
+	          android:singleLine="true"
+			/>
+	<TextView android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:id="@+id/register_password_confirm"
+	          android:text="@string/text_confirm_password"
+	          android:textSize="20sp"
+			/>
+	<EditText android:layout_width="fill_parent"
+	          android:layout_height="wrap_content"
+	          android:background="@drawable/register"
+	          android:hint="@string/text_confirm_password"
+	          android:password="true"
+	          android:id="@+id/register_password_confirm_edit"
+	          android:layout_marginLeft="10dp"
+	          android:layout_marginRight="30dp"
+	          android:singleLine="true"
+			/>
+	<TextView android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:id="@+id/register_email"
+	          android:text="@string/text_confirm_email"
+	          android:textSize="20sp"
+			/>
+	<EditText android:layout_width="fill_parent"
+	          android:layout_height="wrap_content"
+	          android:background="@drawable/register"
+	          android:hint="@string/text_confirm_email"
+	          android:textStyle="bold|italic"
+	          android:layout_marginLeft="10dp"
+	          android:layout_marginRight="30dp"
+	          android:singleLine="true"
+	          android:id="@+id/register_email_edit">
+			</EditText>
+	<RelativeLayout android:layout_width="fill_parent"
+	                android:layout_height="fill_parent"
+	                android:layout_marginTop="10dp"
+	                android:background="@android:color/holo_blue_bright"
+			>
+		<TextView android:layout_width="wrap_content"
+		          android:layout_height="wrap_content"
+		          android:textSize="20sp"
+		          android:text="@string/text_confirm_protocol"
+		          android:id="@+id/protocol_view"
+		          android:layout_marginLeft="6dp"
+		          android:layout_marginTop="25dp"
+				/>
+		<CheckBox android:layout_width="wrap_content"
+		          android:layout_height="wrap_content"
+		          android:id="@+id/checkbox"
+		          android:layout_toRightOf="@id/protocol_view"
+		          android:layout_marginTop="22dp"
+				/>
+		<Button android:layout_width="150sp"
+		        android:layout_height="30sp"
+		        android:text="@string/button_register"
+		        android:textSize="15sp"
+		        android:layout_below="@id/protocol_view"
+		        android:layout_marginLeft="10dp"
+		        android:layout_marginTop="6dp"
+		        android:background="@drawable/press"
+		        android:id="@+id/app_register"
+		        android:enabled="false"
+				/>
+	</RelativeLayout>
+</LinearLayout>
