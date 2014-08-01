@@ -1,4 +1,4 @@
-package com.example.services;
+package utils.android.judgment.sdcard;
 
 import android.content.Context;
 
@@ -17,6 +17,7 @@ public class FileService {
 
 	public void save(String fileName, String content) throws IOException {
 		FileOutputStream outputStream = context.openFileOutput(fileName,Context.MODE_MULTI_PROCESS);
+
 		outputStream.write(content.getBytes());
 		outputStream.close();
 
@@ -33,6 +34,7 @@ public class FileService {
 		}
 		byte[] data = byteArrayOutputStream.toByteArray();
 		String tt = data.toString();
+		byteArrayOutputStream.close();
 		return tt;
 	}
 }
