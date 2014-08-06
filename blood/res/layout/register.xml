@@ -12,7 +12,7 @@
 	          android:text="@string/name_view"
 	          android:id="@+id/register_name"
 	          android:textSize="20sp"
-	          android:layout_marginTop="20dp"
+	          android:layout_marginTop="45dp"
 			/>
 	<EditText android:layout_width="fill_parent"
 	          android:layout_height="wrap_content"
@@ -20,15 +20,15 @@
 	          android:hint="@string/name_edit"
 	          android:id="@+id/register_name_edit"
 	          android:singleLine="true"
-	          android:layout_marginLeft="10dp"
+	          android:layout_marginLeft="30dp"
 	          android:layout_marginRight="30dp"
 
 			/>
 	<TextView android:layout_width="wrap_content"
 	          android:layout_height="wrap_content"
+	          android:layout_marginTop="5dp"
 	          android:id="@+id/register_password"
 	          android:text="@string/set_password_view"
-
 	          android:textSize="20sp"
 			/>
 	<EditText android:layout_width="fill_parent"
@@ -37,12 +37,13 @@
 	          android:password="true"
 	          android:background="@drawable/register"
 	          android:id="@+id/register_password_edit"
-	          android:layout_marginLeft="10dp"
+	          android:layout_marginLeft="30dp"
 	          android:layout_marginRight="30dp"
 	          android:singleLine="true"
 			/>
 	<TextView android:layout_width="wrap_content"
 	          android:layout_height="wrap_content"
+	          android:layout_marginTop="5dp"
 	          android:id="@+id/register_password_confirm"
 	          android:text="@string/password_confirm"
 	          android:textSize="20sp"
@@ -53,12 +54,13 @@
 	          android:hint="@string/password_confirm"
 	          android:password="true"
 	          android:id="@+id/register_password_confirm_edit"
-	          android:layout_marginLeft="10dp"
+	          android:layout_marginLeft="30dp"
 	          android:layout_marginRight="30dp"
 	          android:singleLine="true"
 			/>
 	<TextView android:layout_width="wrap_content"
 	          android:layout_height="wrap_content"
+	          android:layout_marginTop="5dp"
 	          android:id="@+id/register_email"
 	          android:text="@string/email_confirm"
 	          android:textSize="20sp"
@@ -68,44 +70,44 @@
 	          android:background="@drawable/register"
 	          android:hint="@string/email_confirm"
 	          android:textStyle="bold|italic"
-	          android:layout_marginLeft="10dp"
+	          android:layout_marginLeft="30dp"
 	          android:layout_marginRight="30dp"
 	          android:singleLine="true"
 	          android:id="@+id/register_email_edit">
 			</EditText>
 	<RelativeLayout android:layout_width="fill_parent"
 	                android:layout_height="fill_parent"
-	                android:layout_marginTop="10dp"
-	                android:background="@android:color/holo_blue_bright"
+	                android:layout_marginTop="15dp"
+	                android:background="@android:color/holo_green_dark"
 			>
-		<TextView android:layout_width="wrap_content"
-		          android:layout_height="wrap_content"
-		          android:textSize="20sp"
-		          android:text="@string/user_protocol"
-		          android:id="@+id/protocol_view"
-		          android:layout_marginLeft="6dp"
-		          android:layout_marginTop="25dp"
-				/>
+
 		<CheckBox android:layout_width="wrap_content"
 		          android:layout_height="wrap_content"
+		          android:text="@string/user_protocol"
 		          android:id="@+id/checkbox"
-		          android:layout_toRightOf="@id/protocol_view"
-		          android:layout_marginTop="22dp"
+		          android:layout_marginTop="10dp"
 		          android:checked="true"
-		          android:background="@drawable/checkbox_state"
-
+		          android:textSize="20sp"
 				/>
 
-		<Button android:layout_width="150sp"
+		<Button android:layout_width="150dp"
 		        android:layout_height="30sp"
 		        android:text="@string/button_register"
-		        android:textSize="15sp"
-		        android:layout_below="@id/protocol_view"
-		        android:layout_marginLeft="10dp"
-		        android:layout_marginTop="6dp"
+		        android:textSize="20sp"
+		        android:layout_marginTop="12dp"
+		        android:layout_toRightOf="@id/checkbox"
+		        android:layout_marginLeft="30dp"
 		        android:background="@drawable/press"
 		        android:id="@+id/app_register"
-		        android:enabled="false"
+				/>
+		<TextView android:layout_width="fill_parent"
+		          android:layout_height="fill_parent"
+		          android:maxLines="10"
+		          android:textSize="20sp"
+		          android:scrollbars="vertical"
+		          android:layout_below="@id/checkbox"
+		          android:id="@+id/protocol"
 				/>
 	</RelativeLayout>
+
 </LinearLayout>
