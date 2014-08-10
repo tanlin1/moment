@@ -1,11 +1,16 @@
 package com.example.moment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -13,14 +18,14 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import utils.android.Read;
+import utils.android.Write;
 import utils.android.judgment.Login;
 import utils.json.JSONObject;
 import utils.json.JSONStringer;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.*;
 
 public class MainActivity extends Activity {
 
@@ -34,8 +39,7 @@ public class MainActivity extends Activity {
 	private String password;
 	private String email;
 	private CheckBox checkBox;
-	private TextView textView;
-	private boolean isconnect = false;
+	private TextView toFindPassword;
 	//public static String url = "http://192.168.1.100";
 	public static String url = "http://192.168.191.1";
 
@@ -46,6 +50,7 @@ public class MainActivity extends Activity {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		setContentView(R.layout.main);
+		checkInternet(this);
 
 		View imageView = findViewById(R.id.MainView);
 		imageView.setBackgroundDrawable(getWallpaper().getCurrent());
@@ -56,11 +61,31 @@ public class MainActivity extends Activity {
 		passwordEdit = (EditText) findViewById(R.id.set_password);
 
 		checkBox = (CheckBox) findViewById(R.id.checkbox);
-		textView = (TextView) findViewById(R.id.forget_password);
+		toFindPassword = (TextView) findViewById(R.id.find_password);
 
 
+		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
+				if (isChecked) {
+					try {
+						Write.write(MainActivity.this, "test.txt", "yes\r\n你好吗？");
+					} catch (IOException e) {
+						System.out.println("写入文件出错！");
+						e.printStackTrace();
+					}
+				}
 
+			}
+		});
+		toFindPassword.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				//连接到服务器找回密码
+				startActivity(new Intent().setClass(MainActivity.this, HomeActivity.class));
+			}
+		});
 
 		//获取昵称编辑框的数据（通过焦点转移）
 		emailEdit.setOnFocusChangeListener(new emailFocus());
@@ -86,7 +111,7 @@ public class MainActivity extends Activity {
 		register.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-			startActivity(new Intent().setClass(MainActivity.this, RegisterActivity.class));
+				startActivity(new Intent().setClass(MainActivity.this, RegisterActivity.class));
 			}
 		});
 		//点击登录，进行验证用户名以及密码。
@@ -102,6 +127,33 @@ public class MainActivity extends Activity {
 		});
 	}
 
+	private void checkInternet(Context context) {
+		ConnectivityManager mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo wifiInfo = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		NetworkInfo mobile = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+		if ((wifiInfo.getState() == NetworkInfo.State.DISCONNECTED) && (mobile.getState() == NetworkInfo.State.DISCONNECTED)) {
+			AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+			dialog.setTitle(R.string.login_dialog_title);
+			dialog.setMessage(R.string.net_warning);
+			dialog.setPositiveButton(R.string.login_dialog_ok, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+					startActivity(new Intent(Settings.ACTION_SETTINGS));
+				}
+			});
+			dialog.setNegativeButton(R.string.login_dialog_cancel, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					//startActivity(new Intent(Settings.ACTION_ADD_ACCOUNT));
+					dialog.dismiss();
+				}
+			});
+			dialog.create().show();
+		}
+	}
+
 	//昵称编辑框焦点侦听
 	private class emailFocus implements View.OnFocusChangeListener {
 
@@ -109,8 +161,8 @@ public class MainActivity extends Activity {
 		public void onFocusChange(View v, boolean hasFocus) {
 			if (!hasFocus) {
 				email = emailEdit.getText().toString();
-				if(!Login.isEmail(email)){
-					Toast.makeText(getApplicationContext(),R.string.email_wrong,Toast.LENGTH_SHORT).show();
+				if (!Login.isEmail(email)) {
+					Toast.makeText(getApplicationContext(), R.string.email_wrong, Toast.LENGTH_SHORT).show();
 					emailEdit.setText("");
 					email = null;
 				}
@@ -118,51 +170,41 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private class MyHandler extends Handler {
-		public MyHandler() {
-		}
+	Handler handler = new Handler() {
+		@Override
 		public void handleMessage(Message msg) {
-			super.handleMessage(msg);
-			if (msg.getData().get("flag").equals("true")) {
-				startActivity(new Intent().setClass(MainActivity.this, LoginActivity.class));
-				Toast.makeText(getApplicationContext(), "登录成功！", Toast.LENGTH_LONG).show();
-			}else {
-				Toast.makeText(getApplicationContext(), R.string.login_error, Toast.LENGTH_LONG).show();
+			Bundle data = msg.getData();
+			if ("true".equals(data.getString("password"))) {
+				Toast.makeText(getApplicationContext(), "登录成功！", Toast.LENGTH_SHORT).show();
+				//startActivity();
+			} else if ("false".equals(data.getString("password"))) {
+				Toast.makeText(MainActivity.this, R.string.login_error, Toast.LENGTH_SHORT).show();
+			} else if ("yes".equals(data.getString("timeout"))) {
+				Toast.makeText(MainActivity.this, R.string.timeout, Toast.LENGTH_SHORT).show();
 			}
 		}
-	}
+	};
 
 	private class LoginThread extends Thread {
 
-		MyHandler myHandler = new MyHandler();
-		Message msg = new Message();
-
 		@Override
 		public void run() {
-			if (login()) {
-				//成功连接到服务器，标志位
-				//发送消息给父进程
-				Bundle data = new Bundle();
-				data.putBoolean("isconnect", true);
-				msg.setData(data);
-				myHandler.sendMessage(msg);
-			}
+			login();
 		}
+
 	}
 
-	private boolean login() {
+	private void login() {
 
 		URL loginUrl;
-		HttpURLConnection connection;
+		HttpURLConnection connection = null;
 		try {
-			loginUrl = new URL(url+":8080/phone_login");
+			loginUrl = new URL(url + ":8080/phone_login");
 			connection = (HttpURLConnection) loginUrl.openConnection();
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-			return false;
 		} catch (IOException e) {
 			e.printStackTrace();
-			return false;
 		}
 		try {
 			connection.setRequestMethod("POST");
@@ -192,22 +234,31 @@ public class MainActivity extends Activity {
 
 
 			// 取得输入流，并使用Reader读取
-			String temp = Read.read(connection.getInputStream());;
-
-			JSONObject serverInformation = new JSONObject(temp);
-			System.out.println(temp);
-			if(serverInformation.getString("isPassed").equals("no") || serverInformation.getString("server").equals("error")){
-				return false;
+			JSONObject serverInformation = Read.read(connection.getInputStream());
+			if (serverInformation.getString("isPassed").equals("no") || serverInformation.getString("server").equals("error")) {
+				sendMessage("password", "false");
 			}
-			return true;
+			if (serverInformation.getString("isPassed").equals("yes")) {
+				sendMessage("password", "true");
+			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-			return false;
+		} catch (SocketTimeoutException e) {
+			sendMessage("timeout", "yes");
+		} catch (SocketException e) {
+			System.out.println("********************");
 		} catch (IOException e) {
 			e.printStackTrace();
-			return false;
-		}finally {
+		} finally {
 			connection.disconnect();
 		}
+	}
+
+	private void sendMessage(String key, String value) {
+		Bundle data = new Bundle();
+		Message msg = new Message();
+		data.putString(key, value);
+		msg.setData(data);
+		handler.sendMessage(msg);
 	}
 }

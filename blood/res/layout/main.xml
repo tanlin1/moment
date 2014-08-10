@@ -69,13 +69,13 @@
 				/>
 		<TextView android:layout_width="wrap_content"
 		          android:layout_height="wrap_content"
-		          android:text="@string/forget_password"
+		          android:text="@string/find_password"
 		          android:textSize="17sp"
 		          android:layout_alignParentRight="true"
 		          android:layout_marginRight="40dp"
 		          android:layout_marginTop="13dp"
 		          android:layout_below="@id/set_password"
-		          android:id="@+id/forget_password"
+		          android:id="@+id/find_password"
 				/>
 		<Button
 				android:layout_width="99sp"
@@ -84,7 +84,7 @@
 				android:text="@string/button_login"
 				android:background="@drawable/press"
 				android:textSize="20sp"
-				android:layout_below="@id/forget_password"
+				android:layout_below="@id/find_password"
 				android:layout_marginTop="8dp"
 				android:layout_alignRight="@id/set_password"
 				/>

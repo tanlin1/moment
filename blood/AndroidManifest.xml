@@ -22,12 +22,28 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name=".LoginActivity">
+		<activity android:name=".HomeActivity">
 			<intent-filter android:label="Login">
 				<action android:name="android.intent.action.send"/>
 			</intent-filter>
 		
 		</activity>
+		<activity android:name=".UsersActivity">
+			<intent-filter android:label="test">
+				<action>
+
+				</action>
+			</intent-filter>
+		</activity>
+
+		<activity android:name=".NotifyActivity">
+			<intent-filter android:label="test">
+				<action>
+
+				</action>
+			</intent-filter>
+		</activity>
+
 
 	</application>
 	<!--权限申请-->

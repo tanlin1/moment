@@ -1,4 +1,4 @@
-package utils.android.judgment.sdcard;
+package utils.android.sdcard;
 
 import android.content.Context;
 

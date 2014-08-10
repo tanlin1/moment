@@ -20,6 +20,7 @@ import utils.json.JSONObject;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.Map;
  */
 public class RegisterActivity extends Activity {
 
+	public static String SESSIONID = null;
 	private String name;
 	private String password;
 	private String passwordConfirm;
@@ -40,34 +42,9 @@ public class RegisterActivity extends Activity {
 	private EditText emailAddressFind;
 	private EditText passwordConfirmFind;
 
-	private boolean registerFlag = false;
 	private Map<String, String> userInformation = new HashMap<String, String>();
 
-	//处理子线程传回的数据（消息）
-	Handler handler = new Handler() {
-		public void handleMessage(Message msg) {
-			//注册成功
-			if (msg.getData().getBoolean("register")) {
-				Toast.makeText(getApplicationContext(), "注册成功", Toast.LENGTH_SHORT).show();
-				//进入个人主页（设置）
-				//或者进入动态页
-				System.out.println("正在尝试进入主页，敬请期待！");
 
-			} else if (msg.getData().getBoolean("emailIsUsed")) {
-				//邮箱被注册过
-				AlertDialog.Builder dialog = new AlertDialog.Builder(RegisterActivity.this);
-				dialog.setMessage(R.string.email_used);
-				dialog.setCancelable(true);
-				dialog.setTitle(R.string.register_error);
-				emailAddressFind.setText("");
-				dialog.create().show();
-			}else if(!msg.getData().getBoolean("edited")){
-					Toast.makeText(RegisterActivity.this,R.string.name_null,Toast.LENGTH_SHORT).show();
-			}else {
-				//other message could be handled here.
-			}
-		}
-	};
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -93,9 +70,8 @@ public class RegisterActivity extends Activity {
 		/**
 		 * 获取注册按钮
 		 */
-		Button app_register = (Button) findViewById(R.id.app_register);
-		app_register.setOnClickListener(new ButtonOnClickListener());
-
+		Button register = (Button) findViewById(R.id.app_register);
+		register.setOnClickListener(new ButtonOnClickListener());
 
 
 		checkBox.setOnClickListener(new View.OnClickListener() {
@@ -173,6 +149,35 @@ public class RegisterActivity extends Activity {
 		});
 	}
 
+	//处理子线程传回的数据（消息）
+	Handler handler = new Handler() {
+		public void handleMessage(Message msg) {
+			Bundle data = msg.getData();
+			//注册成功
+			if ("ok".equals(data.getString("register"))) {
+				Toast.makeText(getApplicationContext(), "注册成功", Toast.LENGTH_SHORT).show();
+				//进入个人主页（设置）
+				//或者进入动态页
+				System.out.println("正在尝试进入主页，敬请期待！");
+
+			} else if ("yes".equals(data.getBoolean("emailIsUsed"))) {
+				//邮箱被注册过
+				AlertDialog.Builder dialog = new AlertDialog.Builder(RegisterActivity.this);
+				dialog.setMessage(R.string.email_used);
+				dialog.setCancelable(true);
+				dialog.setTitle(R.string.register_error);
+				emailAddressFind.setText("");
+				dialog.create().show();
+			}else if("false".equals(data.getBoolean("edited"))){
+				Toast.makeText(RegisterActivity.this,R.string.name_null,Toast.LENGTH_SHORT).show();
+			}else if("yes".equals(data.getString("timeout"))){
+				Toast.makeText(RegisterActivity.this, R.string.timeout, Toast.LENGTH_SHORT).show();
+			}else {
+				//other message could be handled here.
+			}
+		}
+	};
+
 	/**
 	 * 检测用户注册的时候，邮箱是否符合注册标准
 	 * 必须在子线程中执行
@@ -204,11 +209,7 @@ public class RegisterActivity extends Activity {
 			JSONObject jsonObject = new JSONObject(Read.read(conn.getInputStream()));
 
 			if (jsonObject.getString("isUsed").equals("yes")) {
-				Message msg = new Message();
-				Bundle data = new Bundle();
-				data.putBoolean("emailIsUsed", true);
-				msg.setData(data);
-				handler.sendMessage(msg);
+				sendMessage("emailIsUsed", "yes");
 				conn.disconnect();
 				return;
 			}
@@ -218,8 +219,6 @@ public class RegisterActivity extends Activity {
 			e.printStackTrace();
 		}
 	}
-
-
 
 	private String getProtocolMessage(InputStream inputStream) {
 
@@ -257,7 +256,7 @@ public class RegisterActivity extends Activity {
 		}
 	}
 
-	private boolean Register() {
+	private void Register() {
 		URL url;
 		HttpURLConnection connection = null;
 		try {
@@ -279,70 +278,63 @@ public class RegisterActivity extends Activity {
 			connection.setUseCaches(false);
 			connection.setConnectTimeout(2000);
 
-			//JSONObject user = new JSONObject();
-			//JSONArray test = new JSONArray();
-			JSONObject test = new JSONObject();
+//			JSONStringer string = new JSONStringer();
+//			String str = new String("{'name':"+name + );
 
+			JSONObject info = new JSONObject();
 			userInformation.put("name", name);
 			userInformation.put("email", emailAddress);
 			userInformation.put("password", password);
 
-			test.put("register", userInformation);
-
-			System.out.println(test.toString());
-
-//			//获取输出流，向服务器发送注册信息
-//			StringBuffer buffer = new StringBuffer();
-//			//向缓冲区注入注册信息
-//			byte[] data = buffer.toString().getBytes();
-//			//建立连接
+			info.put("register", userInformation);
 			connection.connect();
 
 			OutputStream writeToServer = connection.getOutputStream();
-			writeToServer.write(test.toString().getBytes());
+			writeToServer.write(info.toString().getBytes());
 
 			// 取得输入流，并使用Reader读取
-			String str = Read.read(connection.getInputStream());
-			System.out.println(str);
+			JSONObject object = Read.read(connection.getInputStream());
+			if(null != object.getString("JSESSIONID")){
+				SESSIONID = object.getString("JSESSIONID");
+				sendMessage("register","ok");
+			}
+
+			System.out.println(object);
 			// 断开连接
-			return true;
+			return ;
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-			return false;
-		} catch (IOException e) {
+			return ;
+		} catch (SocketTimeoutException e){
+			sendMessage("timeout","yes");
+		}catch (IOException e) {
 			e.printStackTrace();
-			return false;
+			return ;
 		} finally {
 			connection.disconnect();
 		}
+		return ;
 	}
 
 	private class registerThread extends Thread {
-		Message registerMessage = new Message();
-
 		@Override
 		public void run() {
-			if (Register()) {
-				registerFlag = true;
-			} else {
-				registerFlag = false;
-			}
-			Bundle data = new Bundle();
-			data.putBoolean("register", registerFlag);
-			registerMessage.setData(data);
-			handler.sendMessage(registerMessage);
+			Register();
 		}
 	}
 
 	private boolean canRegister() {
 		if (name.length() == 0 || password.length() == 0 || emailAddress.length() == 0 || (!checkBox.isChecked())) {
-			Bundle data = new Bundle();
-			Message msg = new Message();
-			data.putBoolean("edited",false);
-			msg.setData(data);
-			handler.sendMessage(msg);
+			sendMessage("edited","false");
 			return false;
 		}
 		return true;
+	}
+	private void sendMessage(String key, String value){
+		Bundle data = new Bundle();
+		Message msg = new Message();
+		data.putString(key,value);
+		msg.setData(data);
+		handler.sendMessage(msg);
 	}
 }

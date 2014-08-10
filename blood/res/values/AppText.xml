@@ -9,16 +9,22 @@
 	<string name="set_password_view">密码</string>
 	<string name="password_edit">登录密码</string>
 	<string name="password_confirm">确认密码</string>
-	<string name="forget_password">忘记密码？</string>
+	<string name="find_password">找回密码</string>
 	<string name="remember_password">记住密码？</string>
 	<string name="email_confirm">设置邮箱</string>
 	<string name="user_protocol">用户协议</string>
 	<string name="password_equal">两次密码不一致！</string>
-	<string name="name_null">昵称不能为空！</string>
+	<string name="name_null">请为你的账户设置一个昵称</string>
 	<string name="password_null">密码不能为空！</string>
 	<string name="email_wrong">邮箱格式错误！</string>
-	<string name="login_warning">用户名或密码不能为空！</string>
+	<string name="login_warning">用户名和密码不能为空！</string>
 	<string name="login_error">密码错误，请注意大小写！</string>
 	<string name="register_error">错误</string>
 	<string name="email_used">抱歉，此邮箱已经被注册，请重新填写邮箱地址，谢谢！</string>
+	<string name="timeout">与服务器连接超时，请检查网络设置!</string>
+	<string name="net_warning">此状态下不能连入Internet，无法使用本软件相关功能。
+		是否现在就去设置？</string>
+	<string name="login_dialog_ok">好的</string>
+	<string name="login_dialog_cancel">不,谢谢</string>
+	<string name="login_dialog_title">Setting</string>
 </resources>
