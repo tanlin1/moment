@@ -27,4 +27,5 @@
 	<string name="login_dialog_ok">好的</string>
 	<string name="login_dialog_cancel">不,谢谢</string>
 	<string name="login_dialog_title">Setting</string>
+	<string name="share_photo">分享一下</string>
 </resources>

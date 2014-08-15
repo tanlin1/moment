@@ -19,35 +19,37 @@
 			<intent-filter android:label="what is it?">
 				<action android:name="android.intent.action.send" />
 				<data android:scheme="who is it?" />
+
 			</intent-filter>
 		</activity>
 
-		<activity android:name=".HomeActivity">
+		<activity android:name=".HomeActivity"
+		          android:theme="@android:style/Animation.Dialog"
+				>
 			<intent-filter android:label="Login">
-				<action android:name="android.intent.action.send"/>
+				<action android:name="android.intent.action.SEND"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+				<data android:mimeType="*/*"/>
 			</intent-filter>
 		
 		</activity>
 		<activity android:name=".UsersActivity">
 			<intent-filter android:label="test">
-				<action>
-
-				</action>
 			</intent-filter>
 		</activity>
 
 		<activity android:name=".NotifyActivity">
-			<intent-filter android:label="test">
-				<action>
-
-				</action>
+			<intent-filter android:label="@string/share_photo">
+				<action android:name="notice"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+				<!--<data android:mimeType="image/*"/>-->
 			</intent-filter>
 		</activity>
-
 
 	</application>
 	<!--权限申请-->
 	<uses-permission android:name="android.permission.INTERNET"/>
+	<uses-permission android:name="android.permission.READ_CONTACTS"/>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 	<uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>

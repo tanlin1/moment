@@ -46,6 +46,7 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -54,6 +55,7 @@ public class MainActivity extends Activity {
 
 		View imageView = findViewById(R.id.MainView);
 		imageView.setBackgroundDrawable(getWallpaper().getCurrent());
+
 
 		login = (Button) findViewById(R.id.button_login);
 		register = (Button) findViewById(R.id.button_register);
@@ -127,6 +129,9 @@ public class MainActivity extends Activity {
 		});
 	}
 
+//	String[] items = new String[]{"Beijing","Shanghai","Chongqing","Tianjin"};
+//	boolean[] itemsCheck = new boolean[items.length];
+
 	private void checkInternet(Context context) {
 		ConnectivityManager mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo wifiInfo = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -134,7 +139,9 @@ public class MainActivity extends Activity {
 
 		if ((wifiInfo.getState() == NetworkInfo.State.DISCONNECTED) && (mobile.getState() == NetworkInfo.State.DISCONNECTED)) {
 			AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+
 			dialog.setTitle(R.string.login_dialog_title);
+			//dialog.setIcon(R.drawable.ic_launcher);
 			dialog.setMessage(R.string.net_warning);
 			dialog.setPositiveButton(R.string.login_dialog_ok, new DialogInterface.OnClickListener() {
 				@Override
@@ -150,6 +157,12 @@ public class MainActivity extends Activity {
 					dialog.dismiss();
 				}
 			});
+//			dialog.setMultiChoiceItems(items,itemsCheck,new DialogInterface.OnMultiChoiceClickListener() {
+//				@Override
+//				public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+//					System.out.println("null");
+//				}
+//			});
 			dialog.create().show();
 		}
 	}
@@ -175,12 +188,14 @@ public class MainActivity extends Activity {
 		public void handleMessage(Message msg) {
 			Bundle data = msg.getData();
 			if ("true".equals(data.getString("password"))) {
-				Toast.makeText(getApplicationContext(), "登录成功！", Toast.LENGTH_SHORT).show();
-				//startActivity();
+				//Toast.makeText(getApplicationContext(), "登录成功！", Toast.LENGTH_SHORT).show();
+				startActivity(new Intent(MainActivity.this, HomeActivity.class));
 			} else if ("false".equals(data.getString("password"))) {
 				Toast.makeText(MainActivity.this, R.string.login_error, Toast.LENGTH_SHORT).show();
 			} else if ("yes".equals(data.getString("timeout"))) {
 				Toast.makeText(MainActivity.this, R.string.timeout, Toast.LENGTH_SHORT).show();
+			} else{
+				startActivity(new Intent(MainActivity.this, HomeActivity.class));
 			}
 		}
 	};
@@ -245,12 +260,28 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 		} catch (SocketTimeoutException e) {
 			sendMessage("timeout", "yes");
+			startActivity(new Intent(this, HomeActivity.class));
 		} catch (SocketException e) {
-			System.out.println("********************");
+			System.out.println("服务器没有打开！");
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
 			connection.disconnect();
+			//显示的Intent（意图）
+			//startActivity(new Intent(this, HomeActivity.class));
+			//测试从子活动中接收数据
+//			Intent info = new Intent(MainActivity.this, HomeActivity.class);
+//			info.putExtra("key","test content");
+//			startActivityForResult(info, 0);
+//			Uri str = Uri.parse("file:///*/.*\\.mp3");
+//			startActivity(new Intent().setDataAndType(str,"audio/mp3"));
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(requestCode == 0 && resultCode == 0){
+			Toast.makeText(this,data.getStringExtra("key"),Toast.LENGTH_LONG).show();
 		}
 	}
 
