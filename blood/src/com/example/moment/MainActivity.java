@@ -11,10 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import utils.android.Read;
@@ -32,6 +29,8 @@ public class MainActivity extends Activity {
 	/**
 	 * Called when the activity is first created.
 	 */
+	private GestureDetector myGesture;
+
 	private EditText emailEdit;
 	private EditText passwordEdit;
 	private Button login;
@@ -51,11 +50,10 @@ public class MainActivity extends Activity {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		setContentView(R.layout.main);
-		checkInternet(this);
-
+		//检查网络
+		//checkInternet(this);
 		View imageView = findViewById(R.id.MainView);
 		imageView.setBackgroundDrawable(getWallpaper().getCurrent());
-
 
 		login = (Button) findViewById(R.id.button_login);
 		register = (Button) findViewById(R.id.button_register);
@@ -85,7 +83,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				//连接到服务器找回密码
-				startActivity(new Intent().setClass(MainActivity.this, HomeActivity.class));
+				startActivity(new Intent().setClass(MainActivity.this, UserCenterActivity.class));
 			}
 		});
 
@@ -189,13 +187,13 @@ public class MainActivity extends Activity {
 			Bundle data = msg.getData();
 			if ("true".equals(data.getString("password"))) {
 				//Toast.makeText(getApplicationContext(), "登录成功！", Toast.LENGTH_SHORT).show();
-				startActivity(new Intent(MainActivity.this, HomeActivity.class));
+				startActivity(new Intent(MainActivity.this, UserCenterActivity.class));
 			} else if ("false".equals(data.getString("password"))) {
 				Toast.makeText(MainActivity.this, R.string.login_error, Toast.LENGTH_SHORT).show();
 			} else if ("yes".equals(data.getString("timeout"))) {
 				Toast.makeText(MainActivity.this, R.string.timeout, Toast.LENGTH_SHORT).show();
 			} else{
-				startActivity(new Intent(MainActivity.this, HomeActivity.class));
+				startActivity(new Intent(MainActivity.this, UserCenterActivity.class));
 			}
 		}
 	};
@@ -230,7 +228,8 @@ public class MainActivity extends Activity {
 			//构造json字符串，并发送
 			JSONStringer jsonStringer = new JSONStringer();
 			String transfer;
-			transfer = jsonStringer.object().key("email").value(email).key("password").value(password).endObject().toString();
+			transfer = jsonStringer.object().key("email").value(email).key("password").value(password)
+					.endObject().toString();
 			System.out.println(transfer);
 
 			//设置请求头字段
@@ -239,14 +238,13 @@ public class MainActivity extends Activity {
 //			connection.setRequestProperty("Content-Type","multipart/form-data");
 			//有相同的属性则覆盖
 			connection.setRequestProperty("user-agent", "Android 4.0.1");
-			connection.setConnectTimeout(5000);
+			connection.setConnectTimeout(2000);
 			connection.connect();
 
 			OutputStream writeToServer = connection.getOutputStream();
 			writeToServer.write(transfer.getBytes());
 			writeToServer.flush();
 			writeToServer.close();
-
 
 			// 取得输入流，并使用Reader读取
 			JSONObject serverInformation = Read.read(connection.getInputStream());
@@ -260,7 +258,7 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 		} catch (SocketTimeoutException e) {
 			sendMessage("timeout", "yes");
-			startActivity(new Intent(this, HomeActivity.class));
+			//startActivity(new Intent(this, HomeActivity.class));
 		} catch (SocketException e) {
 			System.out.println("服务器没有打开！");
 		} catch (IOException e) {
@@ -275,6 +273,9 @@ public class MainActivity extends Activity {
 //			startActivityForResult(info, 0);
 //			Uri str = Uri.parse("file:///*/.*\\.mp3");
 //			startActivity(new Intent().setDataAndType(str,"audio/mp3"));
+
+			startActivity(new Intent(this, UserCenterActivity.class));
+
 		}
 	}
 
