@@ -5,22 +5,27 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
 		>
-	<ImageView
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/camera_photo_scanning"
-			/>
+
 	<Button
 			android:id="@+id/camera_button_photo_direct_post"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="上传原图" />
+			android:text="上传原图"
+	        android:background="@android:color/holo_purple"
+			/>
 
 	<Button
 			android:id="@+id/camera_button_handle_photo"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:textStyle="italic"
-			android:textScaleX="@android:integer/config_shortAnimTime"
-			android:text="美化图片" />
+			android:text="美化图片"
+	        android:background="@android:color/holo_green_light"
+			/>
+
+	<ImageView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/camera_photo_scanning"
+			/>
 </LinearLayout>

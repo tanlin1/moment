@@ -18,10 +18,7 @@ import utils.android.judgment.Login;
 import utils.json.JSONObject;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
+import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,7 +83,7 @@ public class RegisterActivity extends Activity {
 					String s = getProtocolMessage(getResources().openRawResource(R.raw.test));
 					protocol.setMovementMethod(new ScrollingMovementMethod());
 					protocol.setText(s);
-				}else {
+				} else {
 					protocol.setText("");
 				}
 			}
@@ -160,7 +157,7 @@ public class RegisterActivity extends Activity {
 				//或者进入动态页
 				System.out.println("正在尝试进入主页，敬请期待！");
 
-			} else if ("yes".equals(data.getBoolean("emailIsUsed"))) {
+			} else if ("yes".equals(data.getString("emailIsUsed"))) {
 				//邮箱被注册过
 				AlertDialog.Builder dialog = new AlertDialog.Builder(RegisterActivity.this);
 				dialog.setMessage(R.string.email_used);
@@ -168,12 +165,10 @@ public class RegisterActivity extends Activity {
 				dialog.setTitle(R.string.register_error);
 				emailAddressFind.setText("");
 				dialog.create().show();
-			}else if("false".equals(data.getBoolean("edited"))){
-				Toast.makeText(RegisterActivity.this,R.string.name_null,Toast.LENGTH_SHORT).show();
-			}else if("yes".equals(data.getString("timeout"))){
+			} else if ("false".equals(data.getString("edited"))) {
+				Toast.makeText(RegisterActivity.this, R.string.name_null, Toast.LENGTH_SHORT).show();
+			} else if ("yes".equals(data.getString("timeout"))) {
 				Toast.makeText(RegisterActivity.this, R.string.timeout, Toast.LENGTH_SHORT).show();
-			}else {
-				//other message could be handled here.
 			}
 		}
 	};
@@ -182,36 +177,60 @@ public class RegisterActivity extends Activity {
 	 * 检测用户注册的时候，邮箱是否符合注册标准
 	 * 必须在子线程中执行
 	 */
-	private class emailCheckThread extends Thread{
-		public void run(){
+	private class emailCheckThread extends Thread {
+		public void run() {
 			emailCheck();
 		}
 	}
-	private void emailCheck() {
-		URL emailCheckUrl;
-		HttpURLConnection conn;
-		try {
-			emailCheckUrl = new URL(MainActivity.url + ":8080/phone_isEmailUsed");
-			conn = (HttpURLConnection) emailCheckUrl.openConnection();
-			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			conn.setRequestMethod("POST");
-			conn.setDoInput(true);
-			conn.setDoOutput(true);
-			conn.setUseCaches(false);
-			conn.setConnectTimeout(2000);
 
-			conn.connect();
+	/**
+	 * @param url 具体的url
+	 *
+	 * @return 此URL的HttpURLConnection连接
+	 */
+	private HttpURLConnection getUrlConnect(String url) {
+		URL concreteUrl;
+		HttpURLConnection connection = null;
+		try {
+			concreteUrl = new URL(url);
+			connection = (HttpURLConnection) concreteUrl.openConnection();
+			connection.setRequestMethod("POST");
+			connection.setDoInput(true);
+			connection.setDoOutput(true);
+			connection.setUseCaches(false);
+			connection.setConnectTimeout(3000);
+			//设置请求头字段
+			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//          这个属性将被用于大文件传输，有效的提高效率
+//			connection.setRequestProperty("Content-Type","multipart/form-data");
+			//有相同的属性则覆盖
+			connection.setRequestProperty("user-agent", "Android 4.0.1");
+
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (ProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return connection;
+	}
+
+	private void emailCheck() {
+		String emailCheckUrl = ":8080/phone_isEmailUsed";
+		HttpURLConnection connection;
+		try {
+			connection = getUrlConnect(emailCheckUrl);
+			connection.connect();
 			JSONObject object = new JSONObject();
 			object.put("email", emailAddress);
-
-			conn.getOutputStream().write(object.toString().getBytes());
+			connection.getOutputStream().write(object.toString().getBytes());
 			//读取服务器返回的消息
-			JSONObject jsonObject = new JSONObject(Read.read(conn.getInputStream()));
+			JSONObject jsonObject = new JSONObject(Read.read(connection.getInputStream()));
 
 			if (jsonObject.getString("isUsed").equals("yes")) {
 				sendMessage("emailIsUsed", "yes");
-				conn.disconnect();
-				return;
+				connection.disconnect();
 			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -220,27 +239,33 @@ public class RegisterActivity extends Activity {
 		}
 	}
 
+	/**
+	 *
+	 * @param inputStream 一个输入流
+	 * @return 从该输入流读取的内容
+	 */
 	private String getProtocolMessage(InputStream inputStream) {
 
-		InputStreamReader inputStreamReader = null;
-
+		InputStreamReader inputStreamReader;
+		String content = null;
 		try {
 			inputStreamReader = new InputStreamReader(inputStream, "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		BufferedReader reader = new BufferedReader(inputStreamReader);
-		StringBuffer sb = new StringBuffer();
-		String line;
-		try {
+
+			BufferedReader reader = new BufferedReader(inputStreamReader);
+			StringBuilder sb = new StringBuilder();
+			String line;
+
 			while ((line = reader.readLine()) != null) {
 				sb.append(line);
 				sb.append("\n");
 			}
+			content = sb.toString();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return sb.toString();
+		return content;
 	}
 
 	/**
@@ -257,63 +282,40 @@ public class RegisterActivity extends Activity {
 	}
 
 	private void Register() {
-		URL url;
-		HttpURLConnection connection = null;
+		HttpURLConnection connection;
+		JSONObject info = new JSONObject();
+
+		String registerUrl = ":8080/phone_register";
+
+		connection = getUrlConnect(registerUrl);
+
+		userInformation.put("name", name);
+		userInformation.put("email", emailAddress);
+		userInformation.put("password", password);
+
+		info.put("register", userInformation);
 		try {
-			url = new URL(MainActivity.url + ":8080/phone_register");
-			connection = (HttpURLConnection) url.openConnection();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		try {
-			//设置请求头
-			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			connection.setRequestMethod("POST");
-			connection.setDoInput(true);
-			connection.setDoOutput(true);
-			//post请求不能使用cache
-			connection.setUseCaches(false);
-			connection.setConnectTimeout(2000);
-
-//			JSONStringer string = new JSONStringer();
-//			String str = new String("{'name':"+name + );
-
-			JSONObject info = new JSONObject();
-			userInformation.put("name", name);
-			userInformation.put("email", emailAddress);
-			userInformation.put("password", password);
-
-			info.put("register", userInformation);
 			connection.connect();
-
 			OutputStream writeToServer = connection.getOutputStream();
 			writeToServer.write(info.toString().getBytes());
 
 			// 取得输入流，并使用Reader读取
 			JSONObject object = Read.read(connection.getInputStream());
-			if(null != object.getString("JSESSIONID")){
+			if (null != object.getString("JSESSIONID")) {
 				SESSIONID = object.getString("JSESSIONID");
-				sendMessage("register","ok");
+				sendMessage("register", "ok");
 			}
-
 			System.out.println(object);
 			// 断开连接
-			return ;
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-			return ;
-		} catch (SocketTimeoutException e){
-			sendMessage("timeout","yes");
-		}catch (IOException e) {
+		} catch (SocketTimeoutException e) {
+			sendMessage("timeout", "yes");
+		} catch (IOException e) {
 			e.printStackTrace();
-			return ;
 		} finally {
 			connection.disconnect();
 		}
-		return ;
 	}
 
 	private class registerThread extends Thread {
@@ -325,15 +327,16 @@ public class RegisterActivity extends Activity {
 
 	private boolean canRegister() {
 		if (name.length() == 0 || password.length() == 0 || emailAddress.length() == 0 || (!checkBox.isChecked())) {
-			sendMessage("edited","false");
+			sendMessage("edited", "false");
 			return false;
 		}
 		return true;
 	}
-	private void sendMessage(String key, String value){
+
+	private void sendMessage(String key, String value) {
 		Bundle data = new Bundle();
 		Message msg = new Message();
-		data.putString(key,value);
+		data.putString(key, value);
 		msg.setData(data);
 		handler.sendMessage(msg);
 	}

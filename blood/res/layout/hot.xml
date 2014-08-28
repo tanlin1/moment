@@ -15,9 +15,9 @@
 		<ImageButton
 				android:layout_width="50dp"
 				android:layout_height="wrap_content"
-				android:id="@+id/back_home_from_content"
+				android:id="@+id/back_home_from_hot"
 				android:layout_alignParentLeft="true"
-				android:src="@drawable/to_userhome"
+				android:src="@drawable/user_center"
 				/>
 
 		<ImageButton
@@ -25,7 +25,7 @@
 				android:layout_height="wrap_content"
 				android:id="@+id/add_user_to_contact"
 				android:layout_alignParentRight="true"
-				android:src="@drawable/th_contact_tool"
+				android:src="@drawable/user_center"
 				/>
 	</RelativeLayout>
 </LinearLayout>

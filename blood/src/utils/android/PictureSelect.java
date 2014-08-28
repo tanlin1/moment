@@ -13,7 +13,6 @@ import android.view.WindowManager;
  */
 public class PictureSelect extends Activity {
 
-	private Intent pictureSelect;
 	private final int PICTURE_ASK = 1001;
 
 
@@ -24,7 +23,7 @@ public class PictureSelect extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-		pictureSelect = new Intent(Intent.ACTION_GET_CONTENT);
+		Intent pictureSelect = new Intent(Intent.ACTION_GET_CONTENT);
 		pictureSelect.setType("image/*");
 
 		//调用系统相册

@@ -9,20 +9,14 @@ import java.io.*;
  */
 public class FileService {
 
-	private Context context;
-
-	public FileService(Context context){
-		this.context = context;
-	}
-
-	public void save(String fileName, String content) throws IOException {
+	public void save(String fileName, Context context,String content) throws IOException {
 		FileOutputStream outputStream = context.openFileOutput(fileName,Context.MODE_MULTI_PROCESS);
 
 		outputStream.write(content.getBytes());
 		outputStream.close();
 
 	}
-	public String open(String fileName) throws IOException {
+	public String open(Context context,String fileName) throws IOException {
 		FileInputStream fileInputStream = context.openFileInput(fileName);
 		InputStream inputStream = null;
 		byte[] buffer = new byte[1024];

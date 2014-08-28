@@ -4,7 +4,7 @@
               android:orientation="vertical"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
-              android:background="@drawable/th_bloom"
+              android:background="@android:color/holo_blue_bright"
 		>
 	<!--<ImageView-->
 			<!--android:layout_width="fill_parent"-->

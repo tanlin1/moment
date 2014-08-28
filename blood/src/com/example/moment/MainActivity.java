@@ -29,18 +29,13 @@ public class MainActivity extends Activity {
 	/**
 	 * Called when the activity is first created.
 	 */
-	private GestureDetector myGesture;
-
 	private EditText emailEdit;
 	private EditText passwordEdit;
-	private Button login;
-	private Button register;
 	private String password;
 	private String email;
-	private CheckBox checkBox;
-	private TextView toFindPassword;
-	//public static String url = "http://192.168.1.100";
-	public static String url = "http://192.168.191.1";
+	//public static String url = "http://192.168.1.102";
+	//public static String url = "http://192.168.191.1";
+	public static String url = "http://10.10.117.120";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -55,14 +50,13 @@ public class MainActivity extends Activity {
 		View imageView = findViewById(R.id.MainView);
 		imageView.setBackgroundDrawable(getWallpaper().getCurrent());
 
-		login = (Button) findViewById(R.id.button_login);
-		register = (Button) findViewById(R.id.button_register);
+		Button login = (Button) findViewById(R.id.button_login);
+		Button register = (Button) findViewById(R.id.button_register);
 		emailEdit = (EditText) findViewById(R.id.set_name);
 		passwordEdit = (EditText) findViewById(R.id.set_password);
 
-		checkBox = (CheckBox) findViewById(R.id.checkbox);
-		toFindPassword = (TextView) findViewById(R.id.find_password);
-
+		CheckBox checkBox = (CheckBox) findViewById(R.id.checkbox);
+		TextView toFindPassword = (TextView) findViewById(R.id.find_password);
 
 		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
@@ -83,12 +77,13 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				//连接到服务器找回密码
-				startActivity(new Intent().setClass(MainActivity.this, UserCenterActivity.class));
+				startActivity(new Intent().setClass(MainActivity.this, Index.class));
 			}
 		});
 
 		//获取昵称编辑框的数据（通过焦点转移）
 		emailEdit.setOnFocusChangeListener(new emailFocus());
+		passwordEdit.setOnFocusChangeListener(new passwordFocus());
 		//为编辑框设置回车键检测
 		passwordEdit.setOnKeyListener(new View.OnKeyListener() {
 			@Override
@@ -139,7 +134,6 @@ public class MainActivity extends Activity {
 			AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
 
 			dialog.setTitle(R.string.login_dialog_title);
-			//dialog.setIcon(R.drawable.ic_launcher);
 			dialog.setMessage(R.string.net_warning);
 			dialog.setPositiveButton(R.string.login_dialog_ok, new DialogInterface.OnClickListener() {
 				@Override
@@ -151,7 +145,6 @@ public class MainActivity extends Activity {
 			dialog.setNegativeButton(R.string.login_dialog_cancel, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					//startActivity(new Intent(Settings.ACTION_ADD_ACCOUNT));
 					dialog.dismiss();
 				}
 			});
@@ -181,64 +174,86 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	//密码编辑框焦点侦听
+	private class passwordFocus implements View.OnFocusChangeListener {
+
+		@Override
+		public void onFocusChange(View v, boolean hasFocus) {
+			if (!hasFocus) {
+				password = passwordEdit.getText().toString();
+			}
+		}
+	}
+
 	Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
 			Bundle data = msg.getData();
 			if ("true".equals(data.getString("password"))) {
 				//Toast.makeText(getApplicationContext(), "登录成功！", Toast.LENGTH_SHORT).show();
-				startActivity(new Intent(MainActivity.this, UserCenterActivity.class));
+				startActivity(new Intent(MainActivity.this, Index.class));
 			} else if ("false".equals(data.getString("password"))) {
 				Toast.makeText(MainActivity.this, R.string.login_error, Toast.LENGTH_SHORT).show();
 			} else if ("yes".equals(data.getString("timeout"))) {
 				Toast.makeText(MainActivity.this, R.string.timeout, Toast.LENGTH_SHORT).show();
-			} else{
-				startActivity(new Intent(MainActivity.this, UserCenterActivity.class));
+			} else {
+				startActivity(new Intent(MainActivity.this, Index.class));
 			}
 		}
 	};
 
 	private class LoginThread extends Thread {
-
 		@Override
 		public void run() {
 			login();
 		}
-
 	}
 
-	private void login() {
-
+	/**
+	 * @param url 具体的url
+	 *
+	 * @return 此URL的HttpURLConnection连接
+	 */
+	private HttpURLConnection getUrlConnect(String url) {
 		URL loginUrl;
 		HttpURLConnection connection = null;
 		try {
-			loginUrl = new URL(url + ":8080/phone_login");
+			loginUrl = new URL(MainActivity.url + url);
 			connection = (HttpURLConnection) loginUrl.openConnection();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		try {
 			connection.setRequestMethod("POST");
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 			connection.setUseCaches(false);
-
-			//构造json字符串，并发送
-			JSONStringer jsonStringer = new JSONStringer();
-			String transfer;
-			transfer = jsonStringer.object().key("email").value(email).key("password").value(password)
-					.endObject().toString();
-			System.out.println(transfer);
-
+			connection.setConnectTimeout(5000);
 			//设置请求头字段
 			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 //          这个属性将被用于大文件传输，有效的提高效率
 //			connection.setRequestProperty("Content-Type","multipart/form-data");
 			//有相同的属性则覆盖
 			connection.setRequestProperty("user-agent", "Android 4.0.1");
-			connection.setConnectTimeout(2000);
+
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (ProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return connection;
+	}
+
+	private void login() {
+
+		String concreteUrl = ":8080/phone_login";
+		HttpURLConnection connection = getUrlConnect(concreteUrl);
+
+		//构造json字符串，并发送
+		JSONStringer jsonStringer = new JSONStringer();
+		String transfer;
+		transfer = jsonStringer.object().key("email").value(email).key("password").value(password)
+				.endObject().toString();
+		System.out.println(transfer);
+		try {
 			connection.connect();
 
 			OutputStream writeToServer = connection.getOutputStream();
@@ -248,12 +263,13 @@ public class MainActivity extends Activity {
 
 			// 取得输入流，并使用Reader读取
 			JSONObject serverInformation = Read.read(connection.getInputStream());
-			if (serverInformation.getString("isPassed").equals("no") || serverInformation.getString("server").equals("error")) {
+			if (serverInformation.getString("isPassed").equals("no")) {//|| serverInformation.getString("server").equals("error")) {
 				sendMessage("password", "false");
 			}
 			if (serverInformation.getString("isPassed").equals("yes")) {
 				sendMessage("password", "true");
 			}
+			connection.disconnect();
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (SocketTimeoutException e) {
@@ -263,26 +279,23 @@ public class MainActivity extends Activity {
 			System.out.println("服务器没有打开！");
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			connection.disconnect();
-			//显示的Intent（意图）
-			//startActivity(new Intent(this, HomeActivity.class));
-			//测试从子活动中接收数据
+		}
+		//显示的Intent（意图）
+		//startActivity(new Intent(this, HomeActivity.class));
+		//测试从子活动中接收数据
 //			Intent info = new Intent(MainActivity.this, HomeActivity.class);
 //			info.putExtra("key","test content");
 //			startActivityForResult(info, 0);
 //			Uri str = Uri.parse("file:///*/.*\\.mp3");
 //			startActivity(new Intent().setDataAndType(str,"audio/mp3"));
 
-			startActivity(new Intent(this, UserCenterActivity.class));
-
-		}
+//			startActivity(new Intent(this, UserCenterActivity.class));
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if(requestCode == 0 && resultCode == 0){
-			Toast.makeText(this,data.getStringExtra("key"),Toast.LENGTH_LONG).show();
+		if (requestCode == 0 && resultCode == 0) {
+			Toast.makeText(this, data.getStringExtra("key"), Toast.LENGTH_LONG).show();
 		}
 	}
 

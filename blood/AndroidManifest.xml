@@ -23,7 +23,7 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name=".UserCenterActivity"
+		<activity android:name=".Index"
 		          android:theme="@android:style/Animation.Dialog"
 				>
 			<intent-filter android:label="Login">
@@ -33,7 +33,7 @@
 			</intent-filter>
 		
 		</activity>
-		<activity android:name=".UserIndexActivity">
+		<activity android:name=".UserHome">
 			<intent-filter android:label="test">
 			</intent-filter>
 		</activity>

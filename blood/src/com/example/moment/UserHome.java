@@ -8,13 +8,13 @@ import android.view.WindowManager;
 /**
  * Created by Administrator on 2014/8/10.
  */
-public class UserIndexActivity extends Activity {
+public class UserHome extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		setContentView(R.layout.user_index);
+		setContentView(R.layout.home);
 	}
 }

@@ -17,33 +17,22 @@ import java.util.List;
 /**
  * Created by HP on 2014/7/19.
  */
-public class UserCenterActivity extends Activity{
+public class Index extends Activity{
 
 	private ViewPager viewPager;//页卡内容
-	private List<View> listViews; // Tab页面列表
 
-	private ImageButton button_to_notice;
-	private ImageButton button_to_hot;
-	private ImageButton button_to_index;
-	private ImageButton button_to_contact;
-	int firstY; //出现在屏幕上的第一个触点
-	int secondY; //出现在屏幕上的第二个触点
-	private int offset = 0;// 动画图片偏移量
-	private int bmpW;// 动画图片宽度
+	private int firstY; //出现在屏幕上的第一个触点
+	private int secondY; //出现在屏幕上的第二个触点
 
 	private View face;
 	private View notice;
-	private View hot;
-	private View index;
 	private View contact;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		setContentView(R.layout.usercenter);
+		setContentView(R.layout.index_interface);
 
 		//initImageView();
 		initViewPager();
@@ -52,15 +41,13 @@ public class UserCenterActivity extends Activity{
 	private void initViewPager() {
 		viewPager = (ViewPager) findViewById(R.id.view_pager);
 //		pagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_tab);
-		listViews = new ArrayList<View>();
+		List<View> listViews = new ArrayList<View>();
 
-		LayoutInflater mInflater = getLayoutInflater().from(this);
-
+		LayoutInflater mInflater = LayoutInflater.from(this);
+		//null：将所添加的页面不放入任何一个ViewGroup
 		face = mInflater.inflate(R.layout.face, null);
-		notice = mInflater.inflate(R.layout.notice,null);
-		hot = mInflater.inflate(R.layout.hot,null);
-		index = mInflater.inflate(R.layout.user_index,null);
-		contact = mInflater.inflate(R.layout.contact,null);
+		notice = mInflater.inflate(R.layout.notice, null);
+		contact = mInflater.inflate(R.layout.contact, null);
 
 		listViews.add(notice);
 		listViews.add(face);
@@ -87,11 +74,15 @@ public class UserCenterActivity extends Activity{
 		});
 	}
 
+	/**
+	 *
+	 * @param v 一个页面
+	 */
 	private void initButton(View v){
-		button_to_notice = (ImageButton) v.findViewById(R.id.home_to_notice);
-		button_to_hot = (ImageButton) v.findViewById(R.id.home_to_hot);
-		button_to_index = (ImageButton) v.findViewById(R.id.home_to_index);
-		button_to_contact = (ImageButton) v.findViewById(R.id.home_to_contact);
+		ImageButton button_to_notice = (ImageButton) v.findViewById(R.id.home_to_notice);
+		ImageButton button_to_hot = (ImageButton) v.findViewById(R.id.home_to_hot);
+		ImageButton button_to_index = (ImageButton) v.findViewById(R.id.home_to_index);
+		ImageButton button_to_contact = (ImageButton) v.findViewById(R.id.home_to_contact);
 
 		button_to_notice.setOnClickListener(new MyOnClickListener(0));
 		button_to_hot.setOnClickListener(new MyOnClickListener(1));
@@ -122,6 +113,7 @@ public class UserCenterActivity extends Activity{
 	}
 
 	/**
+	 * 打开相册或者是相机，根据参数决定
 	 *
 	 * @param lastPositionY_1 第一个点最后一次在屏幕上的位置
 	 * @param lastPositionY_2 第二个点最后一次在屏幕上的位置
@@ -138,7 +130,7 @@ public class UserCenterActivity extends Activity{
 			startActivity(new Intent(this, PictureSelect.class));
 		}
 	}
-
+	//主界面的按钮触发
 	private class MyOnClickListener implements View.OnClickListener {
 		private int index=0;
 		public MyOnClickListener(int i){
@@ -152,12 +144,12 @@ public class UserCenterActivity extends Activity{
 					break;
 				case 1:
 					//打开热门
-					startActivity(new Intent(UserCenterActivity.this, HotActivity.class));
+					startActivity(new Intent(Index.this, HotActivity.class));
 					overridePendingTransition(R.anim.in_from_left,R.anim.out_to_right);
 					break;
 				case 2:
 					//打开主页
-					startActivity(new Intent(UserCenterActivity.this, UserIndexActivity.class));
+					startActivity(new Intent(Index.this, UserHome.class));
 					overridePendingTransition(R.anim.in_from_right,R.anim.out_to_left);
 					break;
 				case 3:
@@ -167,7 +159,10 @@ public class UserCenterActivity extends Activity{
 		}
 	}
 
-	public class MyPagerAdapter extends PagerAdapter{
+	/**
+	 * 页面适配器
+	 */
+	private class MyPagerAdapter extends PagerAdapter{
 		private List<View> mListViews;
 
 		public MyPagerAdapter(List<View> mListViews) {
@@ -196,7 +191,7 @@ public class UserCenterActivity extends Activity{
 			return arg0==arg1;
 		}
 	}
-
+	//页面侦听
 	public class MyOnPageChangeListener implements OnPageChangeListener {
 		//int distance = offset * 2 + bmpW;
 		@Override
@@ -208,7 +203,24 @@ public class UserCenterActivity extends Activity{
 		}
 
 		@Override
-		public void onPageSelected(int arg0) {
+		public void onPageSelected(final int arg0) {
+
+			if(arg0 == 0 || arg0 == 2){
+				ImageButton back_from_notice = (ImageButton) notice.findViewById(R.id.back_home_from_notice);
+				ImageButton back_from_contact = (ImageButton) contact.findViewById(R.id.back_home_from_contact);
+				back_from_contact.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						viewPager.setCurrentItem(1);
+					}
+				});
+				back_from_notice.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						viewPager.setCurrentItem(1);
+					}
+				});
+			}
 			//标头动画效果
 //			Animation animation = new TranslateAnimation(distance * nearlyIndex, distance * arg0, 0, 0);
 //			nearlyIndex = arg0;
